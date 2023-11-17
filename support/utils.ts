@@ -5,6 +5,7 @@ import type {Page} from '@playwright/test';
 
 import {UserProfile} from '@mattermost/types/users';
 import Client4 from '@mattermost/client/client4';
+import {ChannelsPage} from '@e2e-support/ui/pages';
 
 export const waitForNewMessages = async (page: Page) => {
     await page.waitForTimeout(1000);
@@ -14,13 +15,15 @@ export const waitForNewMessages = async (page: Page) => {
     // await page.locator('#postListContent').getByTestId('NotificationSeparator').getByText('New Messages').waitFor();
 };
 
-export const getTodoBotDMPageURL = async (client: Client4, teamName: string, userId: string) => {
+export const getBotDMPageURL = async (client: Client4, teamName: string, userId: string, botUsername: string) => {
     let team = teamName;
     if (team === '') {
         const teams = await client.getTeamsForUser(userId);
         team = teams[0].name;
     }
-    return `${team}/messages/@todo`;
+    return `${team}/messages/@${botUsername}`;
+
+    // return `${team}/messages/@${botUsername}?skip_github_fetch=true`;
 };
 
 export const fillTextField = async (name: string, value: string, page: Page) => {
@@ -49,6 +52,13 @@ export const cleanUpBotDMs = async (client: Client4, userId: UserProfile['id'], 
 
     const deletePostPromises = Object.keys(posts.posts).map(client.deletePost);
     await Promise.all(deletePostPromises);
+};
+
+export const clickPostAction = async (name: string, c: ChannelsPage) => {
+    // We need to wait for the next post to come up, since this opening a new tab and OAuth redirect can take an undeterminate
+    // https://mattermost.atlassian.net/browse/MM-51906
+    const postElement = await c.centerView.getLastPost();
+    await postElement.container.getByText(name).last().click();
 };
 
 export const getSlackAttachmentLocatorId = (postId: string) => {
