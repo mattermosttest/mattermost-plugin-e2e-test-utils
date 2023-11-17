@@ -1,2 +1,4 @@
 .auth-user.json
 playwright-report
+node_modules
+.DS_Store

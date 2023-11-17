@@ -32,11 +32,11 @@ export const submitDialog = async (page: Page) => {
 };
 
 export const fillMessage = async (message: string, page: Page) => {
-    await fillTextField('post_textbox', message, page )
+    await fillTextField('post_textbox', message, page);
 };
 
 export const postMessage = async (message: string, page: Page) => {
-    await fillMessage(message, page)
+    await fillMessage(message, page);
     await page.getByTestId('SendMessageButton').click();
 };
 
