@@ -1,0 +1,24 @@
+{
+  "name": "mattermost-plugin-e2e-test-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "ui": "playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.41.2",
+    "@testcontainers/postgresql": "^10.7.1",
+    "@types/node": "^20.11.16",
+    "testcontainers": "^10.7.1"
+  },
+  "dependencies": {
+    "@mattermost/client": "^9.4.0",
+    "@mattermost/types": "^9.4.0",
+    "pg": "^8.11.3"
+  }
+}
