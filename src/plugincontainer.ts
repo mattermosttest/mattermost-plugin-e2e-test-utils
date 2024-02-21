@@ -3,11 +3,16 @@ import fs from 'fs';
 
 import MattermostContainer from './mmcontainer';
 
-const RunContainer = async (): Promise<MattermostContainer> => {
+type RunContainerConfig = {
+  packageName: string
+  distPath: string
+}
+
+const RunContainer = async ({ packageName, distPath }: RunContainerConfig): Promise<MattermostContainer> => {
   let filename = "";
-  fs.readdirSync("../dist/").forEach(file => {
+  fs.readdirSync(distPath).forEach(file => {
       if (file.endsWith(".tar.gz")) {
-          filename = "../dist/"+file
+          filename = distPath + file
       }
   })
   if (filename === "") {
@@ -24,7 +29,7 @@ const RunContainer = async (): Promise<MattermostContainer> => {
   	"webhooksecret":              "webhook-secret",
   }
   const mattermost = await new MattermostContainer()
-        .withPlugin(filename, "com.mattermost.msteams-sync", pluginConfig)
+        .withPlugin(filename, packageName, pluginConfig)
         .withEnv("MM_MSTEAMSSYNC_MOCK_CLIENT", "true")
         .start();
   await mattermost.createUser("regularuser@sample.com", "regularuser", "regularuser");
