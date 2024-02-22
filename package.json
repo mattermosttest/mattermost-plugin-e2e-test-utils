@@ -19,6 +19,7 @@
   "dependencies": {
     "@mattermost/client": "^9.4.0",
     "@mattermost/types": "^9.4.0",
+    "node-fetch": "^2.7.0",
     "pg": "^8.11.3"
   }
 }
