@@ -3,12 +3,24 @@ import fs from 'fs';
 
 import MattermostContainer from './mmcontainer';
 
+type PluginConfig = {
+  clientid: string
+  clientsecret: string
+  connectedusersallowed: number
+  encryptionkey: string
+  maxSizeForCompleteDownload: number
+  maxsizeforcompletedownload: number
+  tenantid: string
+  webhooksecret: string
+}
+
 type RunContainerConfig = {
   packageName: string
   distPath: string
+  pluginConfig: PluginConfig
 }
 
-const RunContainer = async ({ packageName, distPath }: RunContainerConfig): Promise<MattermostContainer> => {
+const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContainerConfig): Promise<MattermostContainer> => {
   let filename = "";
   fs.readdirSync(distPath).forEach(file => {
       if (file.endsWith(".tar.gz")) {
@@ -17,16 +29,6 @@ const RunContainer = async ({ packageName, distPath }: RunContainerConfig): Prom
   })
   if (filename === "") {
       throw("No tar.gz file found in dist folder")
-  }
-  const pluginConfig = {
-    "clientid":                   "client-id",
-  	"clientsecret":               "client-secret",
-  	"connectedusersallowed":      1000,
-  	"encryptionkey":              "eyPBz0mBhwfGGwce9hp4TWaYzgY7MdIB",
-  	"maxSizeForCompleteDownload": 20,
-  	"maxsizeforcompletedownload": 20,
-  	"tenantid":                   "tenant-id",
-  	"webhooksecret":              "webhook-secret",
   }
   const mattermost = await new MattermostContainer()
         .withPlugin(filename, packageName, pluginConfig)
