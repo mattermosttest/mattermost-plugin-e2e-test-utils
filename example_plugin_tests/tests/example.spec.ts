@@ -29,8 +29,8 @@ test.afterAll(async () => {
   await mattermost.stop();
 });
 
-test.describe("link slash command", () => {
-  test("try to link a channel as regular user", async ({ page }) => {
+test.describe("example test", () => {
+  test("check if the town square and plublic channel are created", async ({ page }) => {
     const url = mattermost.url();
     await login(page, url, "regularuser", "regularuser");
     await expect(page.getByLabel("town square public channel")).toBeVisible();

@@ -25,6 +25,28 @@ export default class MattermostContainer {
     configFile: any[];
     plugins: any[];
 
+    constructor() {
+        this.command = ["mattermost", "server"];
+        const dbconn = `postgres://user:pass@db:5432/mattermost_test?sslmode=disable`;
+        this.envs = {
+                "MM_SQLSETTINGS_DATASOURCE":          dbconn,
+                "MM_SQLSETTINGS_DRIVERNAME":          "postgres",
+                "MM_SERVICESETTINGS_ENABLELOCALMODE": "true",
+                "MM_PASSWORDSETTINGS_MINIMUMLENGTH":  "5",
+                "MM_PLUGINSETTINGS_ENABLEUPLOADS":    "true",
+                "MM_FILESETTINGS_MAXFILESIZE":        "256000000",
+                "MM_LOGSETTINGS_CONSOLELEVEL":        "DEBUG",
+                "MM_LOGSETTINGS_FILELEVEL":           "DEBUG",
+        };
+        this.email = defaultEmail;
+        this.username = defaultUsername;
+        this.password = defaultPassword;
+        this.teamName = defaultTeamName;
+        this.teamDisplayName = defaultTeamDisplayName;
+        this.plugins = [];
+        this.configFile = [];
+    }
+
     url(): string {
         const containerPort = this.container.getMappedPort(8065)
         const host = this.container.getHost()
@@ -135,28 +157,6 @@ export default class MattermostContainer {
         this.plugins.push({id: pluginID, path: pluginPath, config: pluginConfig})
 
         return this
-    }
-
-    constructor() {
-        this.command = ["mattermost", "server"];
-        const dbconn = `postgres://user:pass@db:5432/mattermost_test?sslmode=disable`;
-        this.envs = {
-                "MM_SQLSETTINGS_DATASOURCE":          dbconn,
-                "MM_SQLSETTINGS_DRIVERNAME":          "postgres",
-                "MM_SERVICESETTINGS_ENABLELOCALMODE": "true",
-                "MM_PASSWORDSETTINGS_MINIMUMLENGTH":  "5",
-                "MM_PLUGINSETTINGS_ENABLEUPLOADS":    "true",
-                "MM_FILESETTINGS_MAXFILESIZE":        "256000000",
-                "MM_LOGSETTINGS_CONSOLELEVEL":        "DEBUG",
-                "MM_LOGSETTINGS_FILELEVEL":           "DEBUG",
-        };
-        this.email = defaultEmail;
-        this.username = defaultUsername;
-        this.password = defaultPassword;
-        this.teamName = defaultTeamName;
-        this.teamDisplayName = defaultTeamDisplayName;
-        this.plugins = [];
-        this.configFile = [];
     }
 
     start = async (): Promise<MattermostContainer> => {
