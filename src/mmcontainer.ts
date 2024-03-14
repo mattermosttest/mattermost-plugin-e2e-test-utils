@@ -97,6 +97,13 @@ export default class MattermostContainer {
         await this.container.exec(["mmctl", "--local", "plugin", "enable", pluginID])
     }
 
+    installPluginFromUrl = async (pluginPath: string) => {
+        const client = await this.getAdminClient()
+        console.log(pluginPath)
+        const manifest = await client.installPluginFromUrl(pluginPath)
+        await this.container.exec(["mmctl", "--local", "plugin", "enable", manifest.id])
+    }
+
     withEnv = (env: string, value: string): MattermostContainer => {
         this.envs[env] = value
         return this
@@ -181,7 +188,11 @@ export default class MattermostContainer {
         await this.addUserToTeam(this.username, this.teamName)
 
         for (const plugin of this.plugins) {
-            await this.installPlugin(plugin.path, plugin.id, plugin.config)
+            if (plugin.path.startsWith('http') || plugin.path.startsWith('https')) {
+                await this.installPluginFromUrl(plugin.path)
+            } else {
+                await this.installPlugin(plugin.path, plugin.id, plugin.config)
+            }
         }
 
         return this

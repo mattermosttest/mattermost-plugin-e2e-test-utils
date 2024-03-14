@@ -14,13 +14,29 @@ type PluginConfig = {
   webhooksecret: string
 }
 
-type RunContainerConfig = {
+type RunContainerWithExternalPluginParams = {
+  packageName: string
+  pluginPath: string
+  pluginConfig: PluginConfig
+}
+
+type RunContainerParams = {
   packageName: string
   distPath: string
   pluginConfig: PluginConfig
 }
 
-const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContainerConfig): Promise<MattermostContainer> => {
+type RunContainerConfig = {
+  packageName: string
+  filename: string
+  pluginConfig: PluginConfig
+}
+
+export const RunContainerWithExternalPlugin = async ({ packageName, pluginPath, pluginConfig }: RunContainerWithExternalPluginParams): Promise<MattermostContainer> => {
+  return RunContainerInternal({ packageName, filename: pluginPath, pluginConfig })
+}
+
+export const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContainerParams): Promise<MattermostContainer> => {
   let filename = "";
   fs.readdirSync(distPath).forEach(file => {
       if (file.endsWith(".tar.gz")) {
@@ -30,6 +46,11 @@ const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContaine
   if (filename === "") {
       throw("No tar.gz file found in dist folder")
   }
+
+  return RunContainerInternal({ packageName, filename, pluginConfig })
+}
+
+const RunContainerInternal = async ({ packageName, filename, pluginConfig }: RunContainerConfig): Promise<MattermostContainer> => {
   const mattermost = await new MattermostContainer()
         .withPlugin(filename, packageName, pluginConfig)
         .withEnv("MM_MSTEAMSSYNC_MOCK_CLIENT", "true")
@@ -72,5 +93,3 @@ const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContaine
 
   return mattermost;
 }
-
-export default RunContainer
