@@ -99,7 +99,6 @@ export default class MattermostContainer {
 
     installPluginFromUrl = async (pluginPath: string) => {
         const client = await this.getAdminClient()
-        console.log(pluginPath)
         const manifest = await client.installPluginFromUrl(pluginPath)
         await this.container.exec(["mmctl", "--local", "plugin", "enable", manifest.id])
     }
