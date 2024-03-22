@@ -1,7 +1,5 @@
 import fs from 'fs';
 
-import {test, expect} from '@playwright/test';
-
 import MattermostContainer from './mmcontainer';
 
 type PluginConfig = {
