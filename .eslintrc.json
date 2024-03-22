@@ -310,7 +310,6 @@
       "no-new-wrappers": 2,
       "no-octal-escape": 2,
       "no-param-reassign": 2,
-      "no-process-env": 2,
       "no-process-exit": 2,
       "no-proto": 2,
       "no-redeclare": 2,
@@ -348,7 +347,6 @@
         }
       ],
       "no-undef-init": 2,
-      "no-undefined": 2,
       "no-underscore-dangle": 2,
       "no-unexpected-multiline": 2,
       "no-unmodified-loop-condition": 2,

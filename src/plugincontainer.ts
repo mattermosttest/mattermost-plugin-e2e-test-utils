@@ -31,11 +31,11 @@ type RunContainerConfig = {
     pluginConfig: PluginConfig
 }
 
-export const RunContainerWithExternalPlugin = async ({packageName, pluginPath, pluginConfig}: RunContainerWithExternalPluginParams): Promise<MattermostContainer> => {
-    return RunContainerInternal({packageName, filename: pluginPath, pluginConfig});
+export const runContainerWithExternalPlugin = async ({packageName, pluginPath, pluginConfig}: RunContainerWithExternalPluginParams): Promise<MattermostContainer> => {
+    return runContainerInternal({packageName, filename: pluginPath, pluginConfig});
 };
 
-export const RunContainer = async ({packageName, distPath, pluginConfig}: RunContainerParams): Promise<MattermostContainer> => {
+export const runContainer = async ({packageName, distPath, pluginConfig}: RunContainerParams): Promise<MattermostContainer> => {
     let filename = '';
     const files = fs.readdirSync(distPath);
     for (const file of files) {
@@ -45,13 +45,13 @@ export const RunContainer = async ({packageName, distPath, pluginConfig}: RunCon
         }
     }
     if (filename === '') {
-        throw ('No tar.gz file found in dist folder');
+        throw Error('No tar.gz file found in dist folder');
     }
 
-    return RunContainerInternal({packageName, filename, pluginConfig});
+    return runContainerInternal({packageName, filename, pluginConfig});
 };
 
-const RunContainerInternal = async ({packageName, filename, pluginConfig}: RunContainerConfig): Promise<MattermostContainer> => {
+const runContainerInternal = async ({packageName, filename, pluginConfig}: RunContainerConfig): Promise<MattermostContainer> => {
     const mattermost = await new MattermostContainer().
         withPlugin(filename, packageName, pluginConfig).
         withEnv('MM_MSTEAMSSYNC_MOCK_CLIENT', 'true').
