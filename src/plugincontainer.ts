@@ -38,11 +38,13 @@ export const RunContainerWithExternalPlugin = async ({ packageName, pluginPath, 
 
 export const RunContainer = async ({ packageName, distPath, pluginConfig }: RunContainerParams): Promise<MattermostContainer> => {
   let filename = "";
-  fs.readdirSync(distPath).forEach(file => {
-      if (file.endsWith(".tar.gz")) {
-          filename = distPath + file
-      }
-  })
+  const files = fs.readdirSync(distPath)
+  for (const file of files) {
+    if (file.endsWith(".tar.gz")) {
+      filename = distPath + file
+      break
+    }
+  }
   if (filename === "") {
       throw("No tar.gz file found in dist folder")
   }
