@@ -1,0 +1,31 @@
+{
+  "name": "mattermost-plugin-e2e-test-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "lint": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx --ext tsx --ext ts . --quiet --cache",
+    "fix": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx --ext tsx --ext ts . --quiet --fix --cache"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.1",
+    "@testcontainers/postgresql": "^10.7.1",
+    "@types/node": "^20.11.16",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "testcontainers": "^10.7.1",
+    "typescript": "^4.3"
+  },
+  "dependencies": {
+    "@mattermost/client": "^9.4.0",
+    "@mattermost/types": "^9.4.0",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.11.3"
+  }
+}
