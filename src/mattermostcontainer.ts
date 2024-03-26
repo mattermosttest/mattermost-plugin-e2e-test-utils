@@ -191,13 +191,15 @@ export default class MattermostContainer {
         await this.createTeam(this.teamName, this.teamDisplayName);
         await this.addUserToTeam(this.username, this.teamName);
 
+        const pluginsToInstall: Promise<void>[] = [];
         for (const plugin of this.plugins) {
             if (plugin.config.path.startsWith('http') || plugin.config.path.startsWith('https')) {
-                await this.installPluginFromUrl(plugin);
+                pluginsToInstall.push(this.installPluginFromUrl(plugin));
             } else {
-                await this.installPluginFromLocalBinary(plugin);
+                pluginsToInstall.push(this.installPluginFromLocalBinary(plugin));
             }
         }
+        await Promise.all(pluginsToInstall);
 
         return this;
     };
