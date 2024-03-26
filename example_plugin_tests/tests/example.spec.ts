@@ -1,28 +1,31 @@
 import {test, expect} from '@playwright/test';
 import {
     MattermostContainer,
+    MattermostPlugin,
     login,
     logout,
-    runContainerWithExternalPlugin,
 } from 'mattermost-plugin-e2e-test-utils';
 
 let mattermost: MattermostContainer;
+let demoPluginInstance: MattermostPlugin;
 
 test.beforeAll(async () => {
-    mattermost = await runContainerWithExternalPlugin({
+    demoPluginInstance = new MattermostPlugin({
         packageName: 'com.mattermost.demo-plugin',
-        pluginPath: 'https://github.com/mattermost/mattermost-plugin-demo/releases/download/v0.10.0/com.mattermost.demo-plugin-0.10.0.tar.gz',
-        pluginConfig: {
-            clientid: 'client-id',
-            clientsecret: 'client-secret',
-            connectedusersallowed: 1000,
-            encryptionkey: 'eyPBz0mBhwfGGwce9hp4TWaYzgY7MdIB',
-            maxSizeForCompleteDownload: 20,
-            maxsizeforcompletedownload: 20,
-            tenantid: 'tenant-id',
-            webhooksecret: 'webhook-secret',
-        },
+        path: 'https://github.com/mattermost/mattermost-plugin-demo/releases/download/v0.10.0/com.mattermost.demo-plugin-0.10.0.tar.gz',
+        clientid: 'client-id',
+        clientsecret: 'client-secret',
+        connectedusersallowed: 1000,
+        encryptionkey: 'eyPBz0mBhwfGGwce9hp4TWaYzgY7MdIB',
+        maxSizeForCompleteDownload: 20,
+        maxsizeforcompletedownload: 20,
+        tenantid: 'tenant-id',
+        webhooksecret: 'webhook-secret',
     });
+
+    mattermost = await new MattermostContainer().
+        withPlugin(demoPluginInstance).
+        startWithUserSetup();
 });
 
 test.afterAll(async () => {

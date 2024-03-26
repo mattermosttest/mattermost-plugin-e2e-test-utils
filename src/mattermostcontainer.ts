@@ -3,6 +3,8 @@ import {StartedPostgreSqlContainer, PostgreSqlContainer} from '@testcontainers/p
 import {Client4} from '@mattermost/client';
 import {Client} from 'pg';
 
+import {MattermostPlugin} from './plugin';
+
 const defaultEmail = 'admin@example.com';
 const defaultUsername = 'admin';
 const defaultPassword = 'admin';
@@ -23,7 +25,7 @@ export default class MattermostContainer {
     envs: {[key: string]: string};
     command: string[];
     configFile: any[];
-    plugins: any[];
+    plugins: MattermostPlugin[];
 
     constructor() {
         this.command = ['mattermost', 'server'];
@@ -108,20 +110,24 @@ export default class MattermostContainer {
         await this.container.exec(['mmctl', '--local', 'config', 'set', 'ServiceSettings.ListenAddress', `${containerPort}`]);
     };
 
-    installPlugin = async (pluginPath: string, pluginID: string, pluginConfig: any) => {
-        const patch = JSON.stringify({PluginSettings: {Plugins: {[pluginID]: pluginConfig}}});
+    installPluginFromLocalBinary = async (plugin: MattermostPlugin) => {
+        const {packageName} = plugin.config;
+        const path = plugin.getFilenamePath();
 
-        await this.container.copyFilesToContainer([{source: pluginPath, target: '/tmp/plugin.tar.gz'}]);
+        const patch = JSON.stringify({PluginSettings: {Plugins: {[packageName]: plugin.config}}});
+
+        await this.container.copyFilesToContainer([{source: path, target: '/tmp/plugin.tar.gz'}]);
         await this.container.copyContentToContainer([{content: patch, target: '/tmp/plugin.config.json'}]);
 
         await this.container.exec(['mmctl', '--local', 'plugin', 'add', '/tmp/plugin.tar.gz']);
         await this.container.exec(['mmctl', '--local', 'config', 'patch', '/tmp/plugin.config.json']);
-        await this.container.exec(['mmctl', '--local', 'plugin', 'enable', pluginID]);
+        await this.container.exec(['mmctl', '--local', 'plugin', 'enable', packageName]);
     };
 
-    installPluginFromUrl = async (pluginPath: string) => {
+    installPluginFromUrl = async (plugin: MattermostPlugin) => {
+        const {path} = plugin.config;
         const client = await this.getAdminClient();
-        const manifest = await client.installPluginFromUrl(pluginPath);
+        const manifest = await client.installPluginFromUrl(path);
         await this.container.exec(['mmctl', '--local', 'plugin', 'enable', manifest.id]);
     };
 
@@ -153,9 +159,8 @@ export default class MattermostContainer {
         return this;
     };
 
-    withPlugin = (pluginPath: string, pluginID: string, pluginConfig: any): MattermostContainer => {
-        this.plugins.push({id: pluginID, path: pluginPath, config: pluginConfig});
-
+    withPlugin = (plugin: MattermostPlugin): MattermostContainer => {
+        this.plugins.push(plugin);
         return this;
     };
 
@@ -187,12 +192,54 @@ export default class MattermostContainer {
         await this.addUserToTeam(this.username, this.teamName);
 
         for (const plugin of this.plugins) {
-            if (plugin.path.startsWith('http') || plugin.path.startsWith('https')) {
-                await this.installPluginFromUrl(plugin.path);
+            if (plugin.config.path.startsWith('http') || plugin.config.path.startsWith('https')) {
+                await this.installPluginFromUrl(plugin);
             } else {
-                await this.installPlugin(plugin.path, plugin.id, plugin.config);
+                await this.installPluginFromLocalBinary(plugin);
             }
         }
+
+        return this;
+    };
+
+    startWithUserSetup = async (): Promise<MattermostContainer> => {
+        await this.start();
+
+        await this.createUser('regularuser@sample.com', 'regularuser', 'regularuser');
+        await this.addUserToTeam('regularuser', 'test');
+        const userClient = await this.getClient('regularuser', 'regularuser');
+        const user = await userClient.getMe();
+        await userClient.savePreferences(user.id, [
+            {user_id: user.id, category: 'tutorial_step', name: user.id, value: '999'},
+            {user_id: user.id, category: 'onboarding_task_list', name: 'onboarding_task_list_show', value: 'false'},
+            {user_id: user.id, category: 'onboarding_task_list', name: 'onboarding_task_list_open', value: 'false'},
+            {
+                user_id: user.id,
+                category: 'drafts',
+                name: 'drafts_tour_tip_showed',
+                value: JSON.stringify({drafts_tour_tip_showed: true}),
+            },
+            {user_id: user.id, category: 'crt_thread_pane_step', name: user.id, value: '999'},
+        ]);
+
+        const adminClient = await this.getAdminClient();
+        const admin = await adminClient.getMe();
+        await adminClient.savePreferences(admin.id, [
+            {user_id: admin.id, category: 'tutorial_step', name: admin.id, value: '999'},
+            {user_id: admin.id, category: 'onboarding_task_list', name: 'onboarding_task_list_show', value: 'false'},
+            {user_id: admin.id, category: 'onboarding_task_list', name: 'onboarding_task_list_open', value: 'false'},
+            {
+                user_id: admin.id,
+                category: 'drafts',
+                name: 'drafts_tour_tip_showed',
+                value: JSON.stringify({drafts_tour_tip_showed: true}),
+            },
+            {user_id: admin.id, category: 'crt_thread_pane_step', name: admin.id, value: '999'},
+        ]);
+        await adminClient.completeSetup({
+            organization: 'test',
+            install_plugins: [],
+        });
 
         return this;
     };
