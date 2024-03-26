@@ -2,7 +2,6 @@ import fs from 'fs';
 
 type Config = {
     packageName: string
-    path: string
     clientid: string
     clientsecret: string
     connectedusersallowed: number
@@ -15,17 +14,26 @@ type Config = {
 
 export default class MattermostPlugin {
     config: Config;
+    isExternal: boolean = false;
+    path: string;
 
     constructor(config: Config) {
         this.config = config;
     }
 
-    getFilenamePath = () => {
+    withExternalPath = (externalPath: string): MattermostPlugin => {
+        this.isExternal = true;
+        this.path = externalPath;
+
+        return this;
+    };
+
+    withLocalBinary = (path: string): MattermostPlugin => {
         let filename = '';
-        const files = fs.readdirSync(this.config.path);
+        const files = fs.readdirSync(path);
         for (const file of files) {
             if (file.endsWith('.tar.gz')) {
-                filename = this.config.path + file;
+                filename = path + file;
                 break;
             }
         }
@@ -33,6 +41,6 @@ export default class MattermostPlugin {
             throw Error('No tar.gz file found in dist folder');
         }
 
-        return filename;
+        return this;
     };
 }

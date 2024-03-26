@@ -112,11 +112,10 @@ export default class MattermostContainer {
 
     installPluginFromLocalBinary = async (plugin: MattermostPlugin) => {
         const {packageName} = plugin.config;
-        const path = plugin.getFilenamePath();
 
         const patch = JSON.stringify({PluginSettings: {Plugins: {[packageName]: plugin.config}}});
 
-        await this.container.copyFilesToContainer([{source: path, target: '/tmp/plugin.tar.gz'}]);
+        await this.container.copyFilesToContainer([{source: plugin.path, target: '/tmp/plugin.tar.gz'}]);
         await this.container.copyContentToContainer([{content: patch, target: '/tmp/plugin.config.json'}]);
 
         await this.container.exec(['mmctl', '--local', 'plugin', 'add', '/tmp/plugin.tar.gz']);
@@ -125,9 +124,8 @@ export default class MattermostContainer {
     };
 
     installPluginFromUrl = async (plugin: MattermostPlugin) => {
-        const {path} = plugin.config;
         const client = await this.getAdminClient();
-        const manifest = await client.installPluginFromUrl(path);
+        const manifest = await client.installPluginFromUrl(plugin.path);
         await this.container.exec(['mmctl', '--local', 'plugin', 'enable', manifest.id]);
     };
 
@@ -193,7 +191,7 @@ export default class MattermostContainer {
 
         const pluginsToInstall: Promise<void>[] = [];
         for (const plugin of this.plugins) {
-            if (plugin.config.path.startsWith('http') || plugin.config.path.startsWith('https')) {
+            if (plugin.isExternal) {
                 pluginsToInstall.push(this.installPluginFromUrl(plugin));
             } else {
                 pluginsToInstall.push(this.installPluginFromLocalBinary(plugin));

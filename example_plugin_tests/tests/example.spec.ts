@@ -12,7 +12,6 @@ let demoPluginInstance: MattermostPlugin;
 test.beforeAll(async () => {
     demoPluginInstance = new MattermostPlugin({
         packageName: 'com.mattermost.demo-plugin',
-        path: 'https://github.com/mattermost/mattermost-plugin-demo/releases/download/v0.10.0/com.mattermost.demo-plugin-0.10.0.tar.gz',
         clientid: 'client-id',
         clientsecret: 'client-secret',
         connectedusersallowed: 1000,
@@ -21,7 +20,8 @@ test.beforeAll(async () => {
         maxsizeforcompletedownload: 20,
         tenantid: 'tenant-id',
         webhooksecret: 'webhook-secret',
-    });
+    }).
+        withExternalPath('https://github.com/mattermost/mattermost-plugin-demo/releases/download/v0.10.0/com.mattermost.demo-plugin-0.10.0.tar.gz');
 
     mattermost = await new MattermostContainer().
         withPlugin(demoPluginInstance).
